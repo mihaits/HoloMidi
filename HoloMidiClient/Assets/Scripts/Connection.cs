@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.MixedReality.Toolkit.UI;
-using TMPro;
 using UnityEngine.Events;
 
 public class Connection : MonoBehaviour
@@ -20,8 +19,6 @@ public class Connection : MonoBehaviour
 
     public UnityEvent OnConnected;
     public UnityEvent OnServerLookupTimeout;
-
-    public TextMeshPro DebugText;
 
     public async void ConnectToServer()
     {
@@ -45,11 +42,11 @@ public class Connection : MonoBehaviour
             EnableBroadcast = true
         };
 
-        DebugText.text += "broadcasting request for server\n";
+        Debug.Log("broadcasting request for server\n");
         var requestBytes = Encoding.ASCII.GetBytes("HoloMidi?");
 		await udpClient.SendAsync(requestBytes, requestBytes.Length, new IPEndPoint(IPAddress.Broadcast, 8888));
 
-		DebugText.text += "waiting for response\n";
+		Debug.Log("waiting for response\n");
         var udpReceiveTask = udpClient.ReceiveAsync();
 
         if (await Task.WhenAny(udpReceiveTask, Task.Delay(1000)) == udpReceiveTask)
@@ -60,7 +57,7 @@ public class Connection : MonoBehaviour
 			if (serverResponse == "HoloMidi!")
 			{
 				var serverEndPoint = udpReceiveTask.Result.RemoteEndPoint;
-                DebugText.text += $"found HoloMidi server at {serverEndPoint.Address}\n";
+                Debug.Log($"found HoloMidi server at {serverEndPoint.Address}\n");
                 serverIP = serverEndPoint.Address.ToString();
 
                 serverWasFound = true;
@@ -69,7 +66,7 @@ public class Connection : MonoBehaviour
 		}
         else
         {
-            DebugText.text += "timeout when searching for server\n";
+            Debug.Log("timeout when searching for server\n");
             OnServerLookupTimeout.Invoke();
         }
 
@@ -84,6 +81,8 @@ public class Connection : MonoBehaviour
 		{
 			_socketConnection = new TcpClient(serverIP, 8052);
 
+            Debug.Log("connected to server");
+
 			var bytes = new byte[1024];
 			using (_networkStream = _socketConnection.GetStream())
 			{
@@ -95,19 +94,19 @@ public class Connection : MonoBehaviour
 					Array.Copy(bytes, 0, incomingData, 0, length);
 
 					var serverMessage = Encoding.ASCII.GetString(incomingData);
-                    DebugText.text += "received message from server: " + serverMessage + "\n";
+                    Debug.Log("received message from server: " + serverMessage + "\n");
                 }
             }
 		}
         catch (OperationCanceledException)
         {
-            DebugText.text += "closing server connection\n";
+            Debug.Log("closing server connection\n");
 
 			_socketConnection.Close();
 		}
 		catch (Exception e)
 		{
-            DebugText.text += $"{e.GetType().Name}: {e.Message }";
+            Debug.Log($"{e.GetType().Name}: {e.Message }");
 		}
 	}
 
@@ -120,12 +119,11 @@ public class Connection : MonoBehaviour
 			if (_networkStream.CanWrite)
 			{
                 _networkStream.Write(bytes, 0, bytes.Length);
-                DebugText.text += "message sent\n";
 			}
 		}
 		catch (SocketException socketException)
 		{
-            DebugText.text += "Socket exception: " + socketException + "\n";
+            Debug.Log("Socket exception: " + socketException + "\n");
 		}
 	}
 
