@@ -13,28 +13,55 @@ namespace HoloMidiServer
             _outputDevice = OutputDevice.GetByName("loopMIDI Port");
         }
 
-        public void NoteOn(byte note, byte velocity)
+        // 0
+        public void NoteOn(byte channel, byte note, byte velocity)
         {
-            var n = new SevenBitNumber(note);
-            var v = new SevenBitNumber(velocity);
+            var midiEvent = new NoteOnEvent
+            {
+                Channel = new FourBitNumber(channel),
+                NoteNumber = new SevenBitNumber(note),
+                Velocity = new SevenBitNumber(velocity)
+            };
 
-            _outputDevice.SendEvent(new NoteOnEvent(n, v));
+            _outputDevice.SendEvent(midiEvent);
         }
 
-        public void NoteOff(byte note)
+        // 1
+        public void NoteOff(byte channel, byte note)
         {
-            var n = new SevenBitNumber(note);
-            var v = new SevenBitNumber(0);
-
-            _outputDevice.SendEvent(new NoteOffEvent(n, v));
+            var midiEvent = new NoteOffEvent
+            {
+                Channel    = new  FourBitNumber(channel),
+                NoteNumber = new SevenBitNumber(note),
+                Velocity   = new SevenBitNumber(0)
+            };
+            
+            _outputDevice.SendEvent(midiEvent);
         }
 
-        public void ControlChange(byte controlNumber, byte controlValue)
+        // 2
+        public void ControlChange(byte channel, byte controlNumber, byte controlValue)
         {
-            var n = new SevenBitNumber(controlNumber);
-            var v = new SevenBitNumber(controlValue);
+            var midiEvent = new ControlChangeEvent
+            {
+                Channel = new FourBitNumber(channel),
+                ControlNumber = new SevenBitNumber(controlNumber),
+                ControlValue  = new SevenBitNumber(controlValue)
+            };
 
-            _outputDevice.SendEvent(new ControlChangeEvent(n, v));
+            _outputDevice.SendEvent(midiEvent);
+        }
+
+        // 3
+        public void PitchBend(byte channel, ushort pitchValue)
+        {
+            var midiEvent = new PitchBendEvent
+            {
+                Channel = new FourBitNumber(channel),
+                PitchValue = pitchValue
+            };
+
+            _outputDevice.SendEvent(midiEvent);
         }
 
         ~MidiDevice()

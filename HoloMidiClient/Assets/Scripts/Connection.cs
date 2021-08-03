@@ -127,19 +127,45 @@ public class Connection : MonoBehaviour
 		}
 	}
 
-    public void SendNoteOn(int note)
+    public void SendNoteOn(int channel, int note, int velocity)
     {
-        SendMessage(new byte[] {0, (byte) note});
+        SendMessage(new[]
+        {
+            (byte) ((0 << 4) | channel), 
+            (byte) note, 
+            (byte) velocity
+        });
     }
 
-    public void SendNoteOff(int note)
+    public void SendNoteOff(int channel, int note)
     {
-        SendMessage(new byte[] { 1, (byte) note });
+        SendMessage(new []
+        {
+            (byte) ((1 << 4) | channel),
+            (byte) note
+        });
     }
 
-    public void SendControlChange(SliderEventData sliderEventData)
+    public void SendControlChange(int channel, int controlNumber, int controlValue)
     {
-        SendMessage(new byte[] {2, 10, (byte) (int) (sliderEventData.NewValue * 127)});
+        SendMessage(new []
+        {
+            (byte) ((2 << 4) | channel),
+            (byte) controlNumber,
+            (byte) controlValue
+        });
+    }
+
+    public void SendPitchBend(int channel, ushort pitchValue)
+    {
+        var pitchValueBytes = BitConverter.GetBytes(pitchValue);
+
+        SendMessage(new[]
+        {
+            (byte) ((3 << 4) | channel),
+            pitchValueBytes[0],
+            pitchValueBytes[1]
+        });
     }
 
     public void OnDestroy()

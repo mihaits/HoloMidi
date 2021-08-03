@@ -101,19 +101,37 @@ namespace HoloMidiServer
 
         private static void HandleMessage(byte[] incomingData) 
         {
-            switch (incomingData[0])
+            // protocol:
+            // byte[0] - midi event type + channel (high + low)
+            // midi event type
+            //      0 - NoteOn 
+            //      1 - NoteOff
+            //      2 - Control Change
+            //      3 - PitchBend
+            // byte[1], byte[2], ... - data
+
+            // Console.WriteLine("received: " + incomingData[0]);
+
+            var type = (byte) (incomingData[0] >> 4);
+            var channel = (byte) (incomingData[0] & 15);
+
+            switch (type)
             {
                 case 0:
-                    MidiDevice.NoteOn(incomingData[1], 127);
+                    MidiDevice.NoteOn(channel, incomingData[1], incomingData[2]);
                     Console.WriteLine("received note on");
                     break;
                 case 1:
-                    MidiDevice.NoteOff(incomingData[1]);
+                    MidiDevice.NoteOff(channel, incomingData[1]);
                     Console.WriteLine("received note off");
                     break;
                 case 2:
-                    MidiDevice.ControlChange(incomingData[1], incomingData[2]);
+                    MidiDevice.ControlChange(channel, incomingData[1], incomingData[2]);
                     Console.WriteLine("received control change");
+                    break;
+                case 3:
+                    MidiDevice.PitchBend(channel, BitConverter.ToUInt16(incomingData, 1));
+                    Console.WriteLine($"received pitch bend: {BitConverter.ToUInt16(incomingData, 1)}");
                     break;
             }
         }
