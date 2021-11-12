@@ -118,7 +118,7 @@ public class Connection : MonoBehaviour
 		{
 			if (_networkStream.CanWrite)
 			{
-                _networkStream.Write(bytes, 0, bytes.Length);
+                _networkStream.WriteAsync(bytes, 0, bytes.Length);
 			}
 		}
 		catch (SocketException socketException)
@@ -171,5 +171,15 @@ public class Connection : MonoBehaviour
     public void OnDestroy()
     {
 		_cancellation.Cancel();
+    }
+
+    public void NoteOn(int note)
+    {
+        SendNoteOn(0, note, 127);
+    }
+
+    public void NoteOff(int note)
+    {
+        SendNoteOff(0, note);
     }
 }
