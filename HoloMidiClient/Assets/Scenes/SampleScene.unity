@@ -2452,7 +2452,7 @@ MonoBehaviour:
   profiles:
   - Target: {fileID: 822282822}
     Themes:
-    - {fileID: 11400000, guid: 5a9046122178b1d4b89a6483b9b6c34e, type: 2}
+    - {fileID: 11400000, guid: 200b287ec9374e241a607415f3288477, type: 2}
   OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -2467,7 +2467,31 @@ MonoBehaviour:
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 69
+            m_IntArgument: 65
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 455899353}
+          m_TargetAssemblyTypeName: Connection, Assembly-CSharp
+          m_MethodName: NoteOn
+          m_Mode: 3
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 68
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 455899353}
+          m_TargetAssemblyTypeName: Connection, Assembly-CSharp
+          m_MethodName: NoteOn
+          m_Mode: 3
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 72
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
@@ -2511,7 +2535,31 @@ MonoBehaviour:
             m_Arguments:
               m_ObjectArgument: {fileID: 0}
               m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-              m_IntArgument: 69
+              m_IntArgument: 65
+              m_FloatArgument: 0
+              m_StringArgument: 
+              m_BoolArgument: 0
+            m_CallState: 2
+          - m_Target: {fileID: 455899353}
+            m_TargetAssemblyTypeName: Connection, Assembly-CSharp
+            m_MethodName: NoteOff
+            m_Mode: 3
+            m_Arguments:
+              m_ObjectArgument: {fileID: 0}
+              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+              m_IntArgument: 68
+              m_FloatArgument: 0
+              m_StringArgument: 
+              m_BoolArgument: 0
+            m_CallState: 2
+          - m_Target: {fileID: 455899353}
+            m_TargetAssemblyTypeName: Connection, Assembly-CSharp
+            m_MethodName: NoteOff
+            m_Mode: 3
+            m_Arguments:
+              m_ObjectArgument: {fileID: 0}
+              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+              m_IntArgument: 72
               m_FloatArgument: 0
               m_StringArgument: 
               m_BoolArgument: 0
