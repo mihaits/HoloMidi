@@ -26,6 +26,18 @@ public class Connection : MonoBehaviour
             _ = ListenForData(_cancellation.Token);
     }
 
+    private static Connection _instance;
+    public static Connection Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = GameObject.Find("Connection").GetComponent<Connection>();
+
+            return _instance;
+        }
+    }
+
 	public void Start()
     {
         _cancellation = new CancellationTokenSource();
@@ -171,15 +183,5 @@ public class Connection : MonoBehaviour
     public void OnDestroy()
     {
 		_cancellation.Cancel();
-    }
-
-    public void NoteOn(int note)
-    {
-        SendNoteOn(0, note, 127);
-    }
-
-    public void NoteOff(int note)
-    {
-        SendNoteOff(0, note);
     }
 }
