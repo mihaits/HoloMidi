@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.MixedReality.Toolkit.UI;
 using UnityEngine.Events;
 
 public class Connection : MonoBehaviour
@@ -106,6 +105,7 @@ public class Connection : MonoBehaviour
 					Array.Copy(bytes, 0, incomingData, 0, length);
 
 					var serverMessage = Encoding.ASCII.GetString(incomingData);
+
                     Debug.Log("received message from server: " + serverMessage + "\n");
                 }
             }
@@ -122,7 +122,7 @@ public class Connection : MonoBehaviour
 		}
 	}
 
-	private void SendMessage(byte[] bytes)
+	private async void SendMessage(byte[] bytes)
     {
         if (_socketConnection == null) return;
 
@@ -130,8 +130,8 @@ public class Connection : MonoBehaviour
 		{
 			if (_networkStream.CanWrite)
 			{
-                _networkStream.WriteAsync(bytes, 0, bytes.Length);
-			}
+                await _networkStream.WriteAsync(bytes, 0, bytes.Length);
+            }
 		}
 		catch (SocketException socketException)
 		{
@@ -154,7 +154,8 @@ public class Connection : MonoBehaviour
         SendMessage(new []
         {
             (byte) ((1 << 4) | channel),
-            (byte) note
+            (byte) note,
+            default
         });
     }
 
@@ -180,8 +181,19 @@ public class Connection : MonoBehaviour
         });
     }
 
+    private void SendDisconnect()
+    {
+        SendMessage(new[]
+        {
+            (byte) 255,
+            default,
+            default
+        });
+    }
+
     public void OnDestroy()
     {
+        SendDisconnect();
 		_cancellation.Cancel();
     }
 }
