@@ -53,11 +53,11 @@ public class Connection : MonoBehaviour
             EnableBroadcast = true
         };
 
-        Debug.Log("broadcasting request for server\n");
+        Debug.Log("broadcasting request for server");
         var requestBytes = Encoding.ASCII.GetBytes("HoloMidi?");
 		await udpClient.SendAsync(requestBytes, requestBytes.Length, new IPEndPoint(IPAddress.Broadcast, 8888));
 
-		Debug.Log("waiting for response\n");
+		Debug.Log("waiting for response");
         var udpReceiveTask = udpClient.ReceiveAsync();
 
         if (await Task.WhenAny(udpReceiveTask, Task.Delay(1000)) == udpReceiveTask)
@@ -68,7 +68,7 @@ public class Connection : MonoBehaviour
 			if (serverResponse == "HoloMidi!")
 			{
 				var serverEndPoint = udpReceiveTask.Result.RemoteEndPoint;
-                Debug.Log($"found HoloMidi server at {serverEndPoint.Address}\n");
+                Debug.Log($"found HoloMidi server at {serverEndPoint.Address}");
                 serverIP = serverEndPoint.Address.ToString();
 
                 serverWasFound = true;
@@ -77,7 +77,7 @@ public class Connection : MonoBehaviour
 		}
         else
         {
-            Debug.Log("timeout when searching for server\n");
+            Debug.Log("timeout when searching for server");
             OnServerLookupTimeout.Invoke();
         }
 
@@ -106,13 +106,13 @@ public class Connection : MonoBehaviour
 
 					var serverMessage = Encoding.ASCII.GetString(incomingData);
 
-                    Debug.Log("received message from server: " + serverMessage + "\n");
+                    Debug.Log("received message from server: " + serverMessage);
                 }
             }
 		}
         catch (OperationCanceledException)
         {
-            Debug.Log("closing server connection\n");
+            Debug.Log("closing server connection");
 
 			_socketConnection.Close();
 		}
@@ -135,7 +135,7 @@ public class Connection : MonoBehaviour
 		}
 		catch (SocketException socketException)
 		{
-            Debug.Log("Socket exception: " + socketException + "\n");
+            Debug.Log("Socket exception: " + socketException);
 		}
 	}
 
