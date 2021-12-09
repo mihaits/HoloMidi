@@ -11,4 +11,9 @@ public class ControlMidiEvent : MonoBehaviour
         var controlValue = (int) (sliderEventData.NewValue * 127);
         Connection.Instance.SendControlChange(Channel, ControlNumber, controlValue);
     }
+
+    public void SendControlChangeValue(int controlValue)
+    {
+        Connection.Instance.SendControlChange(Channel, ControlNumber, controlValue);
+    }
 }
