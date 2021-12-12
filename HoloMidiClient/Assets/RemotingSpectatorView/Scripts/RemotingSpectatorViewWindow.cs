@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,45 +7,29 @@ using UnityEngine;
 /// </summary>
 public class RemotingSpectatorViewWindow : EditorWindow
 {
-    private int _userManualHeight = 200;
-    
-    private string _userManual = @"How to use
-
-- Start and connect Holographic Remoting
-- Start your app in the editor.
-- Select your webcam from the dropdown list (DirectShow cams are not supported)
-- Press ""Play"" above
-- Make sure your webcam is horizontal
-- Position your head right in front of the webcam, at the distance specified by ""Distance from head""
-- Press ""Reset Spectator Camera Position""
-- Hold up your hand so that the Hololens can see it
-- Set camera FOV so that the detected and actual hands are of the same size
-- Enjoy!
-";        
-    
-    private bool IsCameraRunning => EditorApplication.isPlaying ? _target.IsRunning : _isRunning;
-    private Texture RenderTexture => _renderTexture ? _renderTexture : _webCamTexture;
+    private static bool IsCameraRunning => Target.IsRunning;
+    private static Texture RenderTexture => Target.RenderTexture;
 
     private float _margin = 10f;
+    private Rect _imageRect;
 
-    private bool EditorIsPlaying
+    private static RemotingSpectatorView _target;
+    private static RemotingSpectatorView Target
     {
         get
         {
-            if (_editorIsPlaying != EditorApplication.isPlaying)
+            if (_target == null)
             {
-                _editorIsPlaying = EditorApplication.isPlaying;
-
-                SetPlayerPrefsToTarget();
-
-                if (_editorIsPlaying && _isRunning)
+                _target = FindObjectOfType<RemotingSpectatorView>();
+                if (_target == null)
                 {
-                    StopPreview();
-                    StartCamera();
+                    var go = Resources.Load("SpectatorCameraRoot");
+                    var instance = Instantiate(go);
+                    _target = FindObjectOfType<RemotingSpectatorView>();
                 }
             }
 
-            return _editorIsPlaying;
+            return _target;
         }
     }
 
@@ -91,33 +74,15 @@ public class RemotingSpectatorViewWindow : EditorWindow
 
     private static void SetPlayerPrefsToTarget()
     {
-        EnsurePrefabLoaded();
-        _target.CameraIndex = EditorPrefs.GetInt("CameraIndex", 1) - 1;
-        _target.CameraDistanceFromHead = EditorPrefs.GetFloat("DistanceFromHead", .6f);
-        _target.Camera.fieldOfView = EditorPrefs.GetFloat("FieldOfView", 60);
+        Target.Camera.fieldOfView = EditorPrefs.GetFloat("FieldOfView", 60);
+        Target.Width  = EditorPrefs.GetInt("Width", 1280);
+        Target.Height = EditorPrefs.GetInt("Height", 720);
     }
-
-    [SerializeField]
-    private bool _editorIsPlaying; //needs to be SerializeField, because new instance of the window will be created on application play
-
-    [SerializeField]
-    private bool _isRunning;
-
-    [SerializeField]
-    private WebCamTexture _webCamTexture;
-
-    private Texture _renderTexture;
-
-    private static RemotingSpectatorView _target;
-
-    [SerializeField]
-    private string[] _deviceNames;
 
     [MenuItem("Remoting Spectator View/Show window")]
     private static void ShowWindow()
     {
         GetWindow<RemotingSpectatorViewWindow>("Remoting Spectator View");
-        EnsurePrefabLoaded();
     }
 
     private void OnDestroy()
@@ -128,76 +93,22 @@ public class RemotingSpectatorViewWindow : EditorWindow
         }
     }
 
-    private static void EnsurePrefabLoaded()
-    {
-        if (_target == null)
-        {
-            _target = FindObjectOfType<RemotingSpectatorView>();
-            if (_target == null)
-            {
-                var go = Resources.Load("SpectatorCameraRoot");
-                var instance = Instantiate(go);
-                _target = FindObjectOfType<RemotingSpectatorView>();
-            }
-        }
-    }
-
     private void Awake()
     {
-        LoadDevices();
         SetPlayerPrefsToTarget();
-    }
-
-    private void LoadDevices()
-    {
-        List<string> deviceNames = new List<string>();
-        deviceNames.Add("None | Off");
-
-        for (int i = 0; i < WebCamTexture.devices.Length; i++)
-        {
-            deviceNames.Add(WebCamTexture.devices[i].name);
-        }
-
-        _deviceNames = deviceNames.ToArray();
     }
 
     private void Update()
     {
         if (IsCameraRunning)
-        {
             Repaint();
-        }
     }
 
     private void OnGUI()
     {
-        int rowNumber = 0;
-        EnsurePrefabLoaded();
+        var rowNumber = 0;
 
-        var isPlaying = EditorIsPlaying;
-
-        if (_deviceNames == null)
-        {
-            LoadDevices();
-        }
-
-        int selectedDevice = EditorGUI.Popup(GetNextRect(rowNumber, 0f, RectPosition.Start, 0.66f), _target.CameraIndex + 1, _deviceNames);
-
-        if (selectedDevice - 1 != _target.CameraIndex)
-        {
-            bool isRunning = IsCameraRunning;
-            StopCamera();
-            _target.CameraIndex = selectedDevice - 1;
-
-            EditorPrefs.SetInt("CameraIndex", selectedDevice);
-
-            if (isRunning)
-            {
-                StartCamera();
-            }
-        }
-
-        if (GUI.Button(GetNextRect(rowNumber, .66f, RectPosition.End, 0.33f), (IsCameraRunning ? "Stop" : "Play") + (isPlaying ? "" : " preview")))
+        if (GUI.Button(GetNextRect(rowNumber, 0f, RectPosition.Start, 1f), IsCameraRunning ? "Stop" : "Play"))
         {
             if (IsCameraRunning)
             {
@@ -209,121 +120,67 @@ public class RemotingSpectatorViewWindow : EditorWindow
             }
         }
 
-        rowNumber++;
+        rowNumber ++;
 
-        EditorGUI.BeginDisabledGroup(!isPlaying);
+        EditorGUI.BeginDisabledGroup(Target.IsRunning);
 
-        float fov = EditorGUI.FloatField(GetNextRect(rowNumber, 0, RectPosition.Start, 1), "Camera FOV", _target.Camera.fieldOfView);
+        var fov = EditorGUI.FloatField(GetNextRect(rowNumber, 0, RectPosition.Start, 1), "Vertical FOV", Target.Camera.fieldOfView);
 
-        if (Math.Abs(fov - _target.Camera.fieldOfView) > 0.001f)
+        if (Math.Abs(fov - Target.Camera.fieldOfView) > 0.001f)
         {
             EditorPrefs.SetFloat("FieldOfView", fov);
-            _target.Camera.fieldOfView = fov;
+            Target.Camera.fieldOfView = fov;
         }
 
-        rowNumber++;
-        
-        Rect distanceRect;
-        Rect resetButtonRect;
+        rowNumber ++;
 
-        if (position.width > 400)
+        var width  = EditorGUI.IntField(GetNextRect(rowNumber, 0, RectPosition.Start, .5f), "Width",  Target.Width);
+        var height = EditorGUI.IntField(GetNextRect(rowNumber, .5f, RectPosition.End, .5f), "Height", Target.Height);
+
+        if (width > 0)
         {
-            distanceRect = GetNextRect(rowNumber, 0f, RectPosition.Start, .5f);
-            resetButtonRect = GetNextRect(rowNumber, .5f, RectPosition.End, .5f);
-            rowNumber++;
+            EditorPrefs.SetInt("Width", width);
+            Target.Width = width;
         }
-        else
+        if (height > 0)
         {
-            distanceRect = GetNextRect(rowNumber, 0f, RectPosition.Full, 0f);
-            rowNumber++;
-            resetButtonRect = GetNextRect(rowNumber, 0f, RectPosition.Full, 0f);
-            rowNumber++;
+            EditorPrefs.SetInt("Height", height);
+            Target.Height = height;
         }
 
-        float targetDistance = EditorGUI.FloatField(distanceRect, "Distance from head (m)", _target.CameraDistanceFromHead);
-
-        if (Math.Abs(targetDistance - _target.CameraDistanceFromHead) > 0.001f)
-        {
-            EditorPrefs.SetFloat("DistanceFromHead", targetDistance);
-            _target.CameraDistanceFromHead = targetDistance;
-        }
-
-        if (GUI.Button(resetButtonRect, "Reset Spectator Camera Position"))
-        {
-            _target.SetPositionInFrontOfMainCamera();
-        }
-
-        rowNumber++;
+        rowNumber ++;
         EditorGUI.EndDisabledGroup();
         
-        if (RenderTexture != null)
+        if (IsCameraRunning)
         {
-            var imageRect = GetNextRect(rowNumber, 0f, RectPosition.Image, 0f);
+            _imageRect = GetNextRect(rowNumber, 0f, RectPosition.Image, 0f);
 
-            float widthAspect = RenderTexture.width / (float) RenderTexture.height;
-            float rectAspect = imageRect.width / imageRect.height;
+            var widthAspect = RenderTexture.width / (float) RenderTexture.height;
+            var rectAspect = _imageRect.width / _imageRect.height;
 
             if (rectAspect > widthAspect)
             {
-                float aspectRatio = imageRect.height / RenderTexture.height;
-                imageRect.width = RenderTexture.width * aspectRatio;
-                imageRect.x = (position.width - imageRect.width) / 2f;
+                var aspectRatio = _imageRect.height / RenderTexture.height;
+                _imageRect.width = RenderTexture.width * aspectRatio;
+                _imageRect.x = (position.width - _imageRect.width) / 2f;
             }
             else
             {
-                float aspectRatio = imageRect.width / RenderTexture.width;
-                imageRect.height = RenderTexture.height * aspectRatio;
+                var aspectRatio = _imageRect.width / RenderTexture.width;
+                _imageRect.height = RenderTexture.height * aspectRatio;
             }
 
-            EditorGUI.DrawPreviewTexture(imageRect, RenderTexture, null, ScaleMode.StretchToFill);
-        }
-
-        if (!IsCameraRunning)
-        {
-            GUI.Label(GetNextRect(rowNumber, 0f, RectPosition.Full, 0f, _userManualHeight), _userManual);
+            EditorGUI.DrawPreviewTexture(_imageRect, RenderTexture, null, ScaleMode.ScaleToFit);
         }
     }
 
-    private void StartCamera()
+    private static void StartCamera()
     {
-        EnsurePrefabLoaded();
-
-        if (_target.CameraIndex != -1)
-        {
-            if (!EditorIsPlaying)
-            {
-                _isRunning = true;
-                var devices = WebCamTexture.devices;
-                _webCamTexture = new WebCamTexture(devices[_target.CameraIndex].name);
-                _webCamTexture.Play();
-            }
-            else
-            {
-                _renderTexture = _target.StartCamera();
-            }
-        }
+        Target.StartCamera();
     }
 
-    private void StopCamera()
+    private static void StopCamera()
     {
-        if (!EditorIsPlaying)
-        {
-            StopPreview();
-        }
-        else
-        {
-            _target.StopCamera();
-        }
-    }
-
-    private void StopPreview()
-    {
-        _isRunning = false;
-        if (_webCamTexture != null)
-        {
-            _webCamTexture.Stop();
-            _webCamTexture = null;
-            _renderTexture = null;
-        }
+        Target.StopCamera();
     }
 }
