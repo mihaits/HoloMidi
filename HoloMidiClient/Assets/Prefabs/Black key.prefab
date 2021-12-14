@@ -23,6 +23,10 @@ PrefabInstance:
       propertyPath: localCenter.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2083022232812829946, guid: a74616eee53aece4abc376e4b0237cbb, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 835cb4a58f172d7478801db95e510f56, type: 2}
     - target: {fileID: 4668107059170566852, guid: a74616eee53aece4abc376e4b0237cbb, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -101,7 +105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4668107059170566907, guid: a74616eee53aece4abc376e4b0237cbb, type: 3}
       propertyPath: m_Name
-      value: Black key Variant
+      value: Black key
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a74616eee53aece4abc376e4b0237cbb, type: 3}

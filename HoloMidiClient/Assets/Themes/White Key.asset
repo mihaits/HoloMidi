@@ -185,7 +185,7 @@ MonoBehaviour:
         Shader: {fileID: 0}
         GameObject: {fileID: 0}
         Vector2: {x: 0, y: 0}
-        Vector3: {x: 0, y: 0, z: 0}
+        Vector3: {x: 0, y: -0.4, z: 0}
         Vector4: {x: 0, y: 0, z: 0, w: 0}
         Color: {r: 0, g: 0, b: 0, a: 0}
         Quaternion: {x: 0, y: 0, z: 0, w: 0}
@@ -388,7 +388,7 @@ MonoBehaviour:
       ShaderName: 
     customProperties: []
     easing:
-      Enabled: 0
+      Enabled: 1
       Curve:
         serializedVersion: 2
         m_Curve:
@@ -413,5 +413,5 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-      LerpTime: 0.5
+      LerpTime: 0.05
   states: {fileID: 11400000, guid: 5eac1712038236e4b8ffdb3893804fe1, type: 2}
