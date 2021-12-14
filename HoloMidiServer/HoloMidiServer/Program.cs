@@ -14,7 +14,7 @@ namespace HoloMidiServer
         private static TcpClient _connectedTcpClient;
         private static NetworkStream _networkStream;
 
-        private static readonly CancellationTokenSource Cancellation = new();
+        private static CancellationTokenSource Cancellation = new();
         private static bool _shouldExit;
 
         private static readonly MidiDevice MidiDevice = new();
@@ -111,6 +111,9 @@ namespace HoloMidiServer
                 catch (OperationCanceledException)
                 {
                     Console.WriteLine("\ndisconnecting TCP client");
+                    Cancellation.Dispose();
+                    Cancellation = new CancellationTokenSource();
+                    cancellationToken = Cancellation.Token;
                 }
                 catch (ObjectDisposedException) {}
                 catch (Exception ex)
