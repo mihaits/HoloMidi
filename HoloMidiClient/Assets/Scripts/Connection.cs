@@ -22,7 +22,7 @@ public class Connection : MonoBehaviour
     public async void ConnectToServer()
     {
         if (await UdpBroadcast())
-            _ = ListenForData(_cancellation.Token);
+            _ = StartTcpClient(_cancellation.Token);
     }
 
     private static Connection _instance;
@@ -72,7 +72,6 @@ public class Connection : MonoBehaviour
                 serverIP = serverEndPoint.Address.ToString();
 
                 serverWasFound = true;
-				OnConnected.Invoke();
             }
 		}
         else
@@ -86,12 +85,13 @@ public class Connection : MonoBehaviour
         return serverWasFound;
     }
     
-	private async Task ListenForData(CancellationToken cancellationToken)
+	private async Task StartTcpClient(CancellationToken cancellationToken)
 	{
 		try
 		{
 			_socketConnection = new TcpClient(serverIP, 8052);
 
+            OnConnected.Invoke();
             Debug.Log("connected to server");
 
 			var bytes = new byte[1024];
