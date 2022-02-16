@@ -12,7 +12,7 @@ public class ChordMode : MonoBehaviour
     public Vector3 NewChordTriggerOffset;
     public Theme SelectedNoteTheme;
 
-    public List<Interactable> LastChord;
+    public List<Interactable> SelectedNotes;
 
     private Interactable[] _interactables;
     private NoteMidiEvent[] _midiScripts;
@@ -53,7 +53,7 @@ public class ChordMode : MonoBehaviour
             }
         }
 
-        LastChord = new List<Interactable>();
+        SelectedNotes = new List<Interactable>();
 
         SetupNewChordTrigger();
     }
@@ -76,9 +76,9 @@ public class ChordMode : MonoBehaviour
     private void OnNoteToggle(Interactable interactable)
     {
         if (interactable.IsToggled)
-            LastChord.Add(interactable);
+            SelectedNotes.Add(interactable);
         else
-            LastChord.Remove(interactable);
+            SelectedNotes.Remove(interactable);
     }
 
     private void SetupNewChordTrigger()
@@ -93,11 +93,23 @@ public class ChordMode : MonoBehaviour
     public void FinishChordTrigger(ManipulationEventData _)
     {
         var chordTriggerScript = _newChordTrigger.GetComponent<PianoChordTrigger>();
-        chordTriggerScript.Init(LastChord.ToArray());
+        chordTriggerScript.Init(SelectedNotes.ToArray());
 
         var chordTriggerManipulator = _newChordTrigger.GetComponentInChildren<ObjectManipulator>();
         chordTriggerManipulator.OnManipulationStarted.RemoveAllListeners();
 
+        ResetSelectedNotes();
+
         SetupNewChordTrigger();
+    }
+
+    private void ResetSelectedNotes()
+    {
+        foreach (var interactable in SelectedNotes)
+        {
+            interactable.ResetAllStates();
+        }
+
+        SelectedNotes.Clear();
     }
 }
